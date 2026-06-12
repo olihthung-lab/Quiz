@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>［運動服飾品牌調查］穿搭喜好分析你的隱藏個性</title>
+    <style>
+        :root {
+            --primary: #2d3748;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #4a5568;
+        }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--primary); margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .container { max-width: 600px; width: 100%; background: var(--card-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        .progress-container { width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; margin-bottom: 30px; display: none; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #ed8936, #ecc94b); width: 0%; transition: width 0.3s ease; }
+
+        h1 { text-align: center; font-size: 22px; margin-bottom: 10px; color: #1a202c; line-height: 1.4; }
+        .subtitle { text-align: center; color: #718096; font-size: 14px; margin-bottom: 30px; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-start { display: block; width: 100%; background: #1a202c; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .btn-start:hover { background: #4a5568; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 20px; }
+        .option-btn { background: white; border: 2px solid #e2e8f0; padding: 16px 20px; border-radius: 12px; font-size: 16px; cursor: pointer; text-align: left; transition: all 0.2s; color: var(--text); display: flex; align-items: center; }
+        .option-btn:hover { border-color: #4a5568; background: #f8fafc; transform: translateX(4px); }
+        .option-prefix { font-weight: bold; margin-right: 12px; color: #a0aec0; }
+
+        .color-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 20px; }
+        .color-btn { display: flex; flex-direction: column; align-items: center; padding: 20px; border: 2px solid #e2e8f0; background: white; border-radius: 16px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+        .color-btn:hover { border-color: #4a5568; transform: scale(1.02); }
+        .color-circle { width: 50px; height: 50px; border-radius: 50%; margin-bottom: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
+
+        /* 動態組合特製卡片 */
+        .combo-card { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px; padding: 20px; cursor: pointer; transition: all 0.2s; margin-top: 15px; }
+        .combo-card:hover { border-color: #4a5568; background: #fff; }
+        .combo-preview { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; }
+        .combo-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+        .result-box { text-align: center; }
+        .result-desc { line-height: 1.8; color: var(--text); text-align: justify; background: #f7fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ed8936; margin-top: 20px; }
+
+        /* 後台 */
+        .admin-container { max-width: 1100px; width: 100%; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        th { background: #edf2f7; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .footer-admin-trigger { margin-top: 30px; text-align: center; font-size: 11px; color: #cbd5e0; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quiz-app">
+    <div class="progress-container" id="progress-wrapper">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="screen active" id="screen-welcome">
+        <h1 style="font-size:24px;">［運動美學調查］<br>穿搭喜好分析你的隱藏個性</h1>
+        <div class="subtitle">Aesthetic & Style Match Survey</div>
+        <p style="line-height:1.7; color:var(--text); text-align:justify;">歡迎參與本次風格探索！我們將透過你對運動日常、色彩與視覺平衡的直覺選擇，剖析你潛意識中的隱藏美學基因，並為你找出最具質感的個人定番組合。請依第一直覺作答。</p>
+        <button class="btn-start" onclick="startQuiz()">開始探索</button>
+    </div>
+
+    <div class="screen" id="q1">
+        <h1>01. 在高強度運動時，你最希望身體進入哪一種專注狀態？</h1>
+        <div class="btn-grid">
+            <button class="option-btn" onclick="nextStep(1, 'A')"><span class="option-prefix">A</span> 感受心跳與呼吸的律動，釋放所有壓力</button>
+            <button class="option-btn" onclick="nextStep(1, 'B')"><span class="option-prefix">B</span> 突破自我極限，享受汗水淋漓的成就感</button>
+            <button class="option-btn" onclick="nextStep(1, 'C')"><span class="option-prefix">C</span> 沉浸在流暢的動作中，找回內心的平靜</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q2">
+        <h1>02. 挑選運動下著（短褲）時，以下哪一種色彩基調最能讓你感到自在安穩？</h1>
+        <div class="color-grid">
+            <button class="color-btn" onclick="nextStep(2, '白色')"><div class="color-circle" style="background-color: #f3f4f6;"></div>霧灰白 (Bone)</button>
+            <button class="color-btn" onclick="nextStep(2, '灰色')"><div class="color-circle" style="background-color: #9ca3af;"></div>經典深灰 (Asphalt)</button>
+            <button class="color-btn" onclick="nextStep(2, '綠色')"><div class="color-circle" style="background-color: #2b4c3f;"></div>時髦墨綠 (Sage)</button>
+            <button class="color-btn" onclick="nextStep(2, '藍色')"><div class="color-circle" style="background-color: #1e293b;"></div>沉穩藏藍 (Navy)</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q3">
+        <h1>03. 走進一間頂級健身空間，哪一種視覺採光氛圍最吸引你？</h1>
+        <div class="btn-grid">
+            <button class="option-btn" onclick="nextStep(3, 'A')"><span class="option-prefix">A</span> 大片落地窗投射進來的通透自然光線</button>
+            <button class="option-btn" onclick="nextStep(3, 'B')"><span class="option-prefix">B</span> 低調沉穩、讓人高度專注的暗色系微光</button>
+            <button class="option-btn" onclick="nextStep(3, 'C')"><span class="option-prefix">C</span> 明亮俐落、充滿現代科技感的暖白光</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q4">
+        <h1>04. 若要選擇一件主體訓練短袖上衣，你直覺最想穿上哪一個色系？</h1>
+        <div class="color-grid">
+            <button class="color-btn" onclick="selectShirt('白色')"><div class="color-circle" style="background-color: #e0f2fe;"></div>清爽淺藍白 (Ice Blue)</button>
+            <button class="color-btn" onclick="selectShirt('灰色')"><div class="color-circle" style="background-color: #707571;"></div>鼠尾草灰 (Grey Sage)</button>
+            <button class="color-btn" onclick="selectShirt('綠色')"><div class="color-circle" style="background-color: #1c3d31;"></div>深邃森林綠 (Dark Forest)</button>
+            <button class="color-btn" onclick="selectShirt('藍色')"><div class="color-circle" style="background-color: #1a233a;"></div>高雅海軍藍 (True Navy)</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q5">
+        <h1>05. 系統根據你的直覺美學，生成了以下兩套訓練套裝，你認為哪一組的視覺平衡感更高級？</h1>
+        <div id="q5-combo-container"></div>
+    </div>
+
+    <div class="screen" id="q6">
+        <h1>06. 當你面對一場極高強度的核心或心肺訓練時，你的定番穿搭通常是？</h1>
+        <div class="btn-grid">
+            <button class="option-btn" onclick="nextStep(6, '背心+短褲')"><span class="option-prefix">A</span> 俐落無阻的【機能背心 + 輕量短褲】</button>
+            <button class="option-btn" onclick="nextStep(6, '短袖+短褲')"><span class="option-prefix">B</span> 經典不敗的【科技短袖 + 專業短褲】</button>
+            <button class="option-btn" onclick="nextStep(6, 'Polo衫+短褲')"><span class="option-prefix">C</span> 風格全開的【運動Polo Shirt + 短褲】</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q7">
+        <h1>07. 若要出席一場講究質感的公開戶外運動聚會，以下哪一套色彩搭配能展現你的最佳品味？</h1>
+        <div id="q7-combo-container"></div>
+    </div>
+
+    <div class="screen" id="q8">
+        <h1>08. 如果要在整套服飾中展現最完美的細節與和諧感，你認為你剛剛挑選的「上衣主色」是否就是你的本命色？</h1>
+        <div id="q8-lock-container"></div>
+    </div>
+
+    <div class="screen" id="q9">
+        <h1>09. 在挑選日常運動隨身器物（如水壺、藍牙耳機）時，你最執著的特質是？</h1>
+        <div class="btn-grid">
+            <button class="option-btn" onclick="nextStep(9, 'A')"><span class="option-prefix">A</span> 觸感細緻、不留指紋的極簡霧面烤漆</button>
+            <button class="option-btn" onclick="nextStep(9, 'B')"><span class="option-prefix">B</span> 符合人體工學與極致輕量化的結構</button>
+            <button class="option-btn" onclick="nextStep(9, 'C')"><span class="option-prefix">C</span> 找不到明顯品牌大商標的極低調設計</button>
+        </div>
+    </div>
+
+    <div class="screen" id="q10">
+        <h1>10. 若要在整身沉穩的運動服飾中加入一個配件亮點（如機能襪），你直覺會選？</h1>
+        <div class="color-grid">
+            <button class="color-btn" onclick="finishQuiz('白色')"><div class="color-circle" style="background-color: #ffffff; border:1px solid #ddd;"></div>俐落純白</button>
+            <button class="color-btn" onclick="finishQuiz('灰色')"><div class="color-circle" style="background-color: #e2e8f0;"></div>燕麥混灰</button>
+            <button class="color-btn" onclick="finishQuiz('綠色')"><div class="color-circle" style="background-color: #a7f3d0;"></div>復古鼠尾草綠</button>
+            <button class="color-btn" onclick="finishQuiz('藍色')"><div class="color-circle" style="background-color: #bfdbfe;"></div>霧霾淺藍</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-result">
+        <div class="result-box">
+            <div style="font-size:50px; margin-bottom:15px;">✨</div>
+            <h1 style="font-size:24px; font-weight:bold;">極致風格的品味實踐者</h1>
+            <div class="result-desc">
+                你有著極其敏銳的美學直覺，在日常與訓練中重視「視覺秩序」與「細節質感」。你不盲目追隨潮流，善於在舒適與頂級美感間抓到完美的平衡點。不論色系如何變換，你都能穿出專專屬於你的高級感與獨立品味！
+            </div>
+            <p style="color: #a0aec0; font-size: 13px; margin-top: 30px;">感謝參與本次風格美學調查。</p>
+        </div>
+    </div>
+
+    <div class="footer-admin-trigger" onclick="verifyAdminPassword()">⚙️ 後台系統入口</div>
+</div>
+
+<div class="admin-container" id="admin-app">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #edf2f7; padding-bottom:15px; margin-bottom:20px;">
+        <h2 style="margin:0;">📊 穿搭組合交叉驗證 - 後台管理系統</h2>
+        <div>
+            <button onclick="if(confirm('確定清空？')){localStorage.removeItem('db_combos');location.reload();}" style="background:#e53e3e; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;">清空所有數據</button>
+            <button onclick="location.search=''" style="padding:8px 14px; border:1px solid #cbd5e0; background:white; border-radius:6px; cursor:pointer; margin-left:10px;">返回前台</button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>作答時間</th>
+                    <th>Q2 初選短褲</th>
+                    <th>Q4 初選上衣</th>
+                    <th>Q5 組合驗證抉擇</th>
+                    <th>Q7 三選一極致組合抉擇</th>
+                    <th>Q8 最終本命鎖定結果</th>
+                </tr>
+            </thead>
+            <tbody id="admin-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 初始模擬數據
+    const mockData = [
+        {time:"2026-06-12 14:30:11", q2:"灰色", q4:"藍色", q5:"精選套裝：藍色上衣 + 灰色短褲 (完全符合初選)", q7:"黃金定番：藍色上衣 + 灰色短褲", q8:"是的，這完全是我的本命色組合"},
+        {time:"2026-06-12 15:12:45", q2:"綠色", q4:"綠色", q5:"精選套裝：綠色上衣 + 綠色短褲 (完全符合初選)", q7:"極簡純色：綠色上衣 + 綠色短褲", q8:"對，但我希望能搭配其他色系的下著看看"}
+    ];
+
+    let dbResponses = JSON.parse(localStorage.getItem('db_combos')) || mockData;
+    let currentAnswers = {};
+    const totalQuestions = 10;
+
+    // 色彩代碼對照表
+    const colorHex = { '白色': '#f3f4f6', '灰色': '#9ca3af', '綠色': '#2b4c3f', '藍色': '#1e293b' };
+    const shirtHex = { '白色': '#e0f2fe', '灰色': '#707571', '綠色': '#1c3d31', '藍色': '#1a233a' };
+    
+    // 照片檔案名稱對照表
+    const photoMap = {
+        '褲子_白色': 'image_a18742.png (Pace Breaker 白)',
+        '褲子_灰色': 'image_a18748.png (Pace Breaker 灰)',
+        '褲子_綠色': 'image_a18728.png (Pace Breaker 綠)',
+        '褲子_藍色': '網頁款 (Pace Breaker 藍)',
+        '上衣_白色': 'image_a18724.png (Metal Vent 淺藍白)',
+        '上衣_灰色': 'image_a186eb.png (Metal Vent 鼠尾草灰)',
+        '上衣_綠色': 'image_a186cd.png (Metal Vent 森林綠)',
+        '上衣_藍色': 'image_a18708.png (Metal Vent 海軍藍)'
+    };
+
+    function startQuiz() {
+        document.getElementById('screen-welcome').classList.remove('active');
+        document.getElementById('progress-wrapper').style.display = 'block';
+        showQuestion(1);
+    }
+
+    function showQuestion(qNum) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('q' + qNum).classList.add('active');
+        document.getElementById('progress-bar').style.width = ((qNum - 1) / totalQuestions) * 100 + '%';
+    }
+
+    function nextStep(currentQ, answer) {
+        currentAnswers['q' + currentQ] = answer;
+        showQuestion(currentQ + 1);
+    }
+
+    // 核心邏輯修正：將變數明確區分開來（chosenShirt 與 chosenShorts）
+    function selectShirt(color) {
+        currentAnswers['q4'] = color; // 記錄使用者選出的初選上衣顏色
+        
+        let chosenShirt = currentAnswers['q4']; // 上衣固定
+        let chosenShorts = currentAnswers['q2']; // 褲子固定
+        
+        // 算出一個非初選褲子的替代顏色，用來做對比交叉測試
+        let altColors = ['白色', '灰色', '綠色', '藍色'].filter(c => c !== chosenShorts);
+        let altShortsColor = altColors[0]; 
+
+        // 渲染 Q5：初選成套套裝 vs 混搭替代褲子套裝
+        document.getElementById('q5-combo-container').innerHTML = `
+            <div class="combo-card" onclick="nextStep(5, '精選套裝：${chosenShirt}上衣 + ${chosenShorts}短褲 (完全符合初選)')">
+                <div class="combo-preview">
+                    <div class="color-circle" style="background-color:${shirtHex[chosenShirt]};"></div>
+                    <div class="color-circle" style="background-color:${colorHex[chosenShorts]};"></div>
+                </div>
+                <div style="text-align:center; font-weight:bold;">選項 A：極致和諧系列 (${chosenShirt}上衣 × ${chosenShorts}短褲)</div>
+            </div>
+            <div class="combo-card" onclick="nextStep(5, '混搭套裝：${chosenShirt}上衣 + ${altShortsColor}短褲 (褲子被動搖)')">
+                <div class="combo-preview">
+                    <div class="color-circle" style="background-color:${shirtHex[chosenShirt]};"></div>
+                    <div class="color-circle" style="background-color:${colorHex[altShortsColor]};"></div>
+                </div>
+                <div style="text-align:center; font-weight:bold;">選項 B：跳色美學系列 (${chosenShirt}上衣 × ${altShortsColor}短褲)</div>
+            </div>
+        `;
+
+        // 渲染 Q7：正解三選一（修復了變數名稱，徹底解決全灰的 Bug）
+        document.getElementById('q7-combo-container').innerHTML = `
+            <div class="combo-card" onclick="nextStep(7, '黃金定番：${chosenShirt}上衣 + ${chosenShorts}短褲')">
+                <div style="text-align:center; font-weight:bold; color:#ed8936;">★ 風格定番組</div>
+                <p style="text-align:center; margin:5px 0 0 0; font-size:14px; color:#718096;">您最初直覺的頂級配置：${chosenShirt}上衣 × ${chosenShorts}短褲</p>
+            </div>
+            <div class="combo-card" onclick="nextStep(7, '高階倒轉：${chosenShorts}上衣 + ${chosenShirt}短褲')">
+                <div style="text-align:center; font-weight:bold;">★ 鏡像對稱組</div>
+                <p style="text-align:center; margin:5px 0 0 0; font-size:14px; color:#718096;">把顏色倒過來穿：${chosenShorts}上衣 × ${chosenShirt}短褲</p>
+            </div>
+            <div class="combo-card" onclick="nextStep(7, '極簡純色：${chosenShirt}上衣 + ${chosenShirt}短褲')">
+                <div style="text-align:center; font-weight:bold;">★ ONE-TONE 同色系組</div>
+                <p style="text-align:center; margin:5px 0 0 0; font-size:14px; color:#718096;">全身一體成型高級感：${chosenShirt}上衣 × ${chosenShirt}短褲</p>
+            </div>
+        `;
+
+        // 渲染 Q8：直接針對他的上衣本命做靈魂拷問
+        document.getElementById('q8-lock-container').innerHTML = `
+            <div class="btn-grid">
+                <button class="option-btn" onclick="nextStep(8, '是的，這完全是我的本命色組合')"><span class="option-prefix">A</span> 是的，【${chosenShirt}上衣】搭配起來層次感最完美，無可取代</button>
+                <button class="option-btn" onclick="nextStep(8, '對，但我希望能搭配其他色系的下著看看')"><span class="option-prefix">B</span> 顏色對了，但剛才搭配的褲子顏色好像可以再微調</button>
+                <button class="option-btn" onclick="nextStep(8, '其實看到組合後，我可能更傾向其他顏色的上衣')"><span class="option-prefix">C</span> 看到實裝組合後，我發現我其實更想試試其他色系的上衣</button>
+            </div>
+        `;
+
+        showQuestion(5);
+    }
+
+    function finishQuiz(lastAnswer) {
+        currentAnswers['q10'] = lastAnswer;
+        
+        let now = new Date();
+        let timestamp = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+
+        let newPayload = {
+            time: timestamp,
+            q2: currentAnswers['q2'], 
+            q4: currentAnswers['q4'], 
+            q5: currentAnswers['q5'], 
+            q7: currentAnswers['q7'], 
+            q8: currentAnswers['q8']  
+        };
+
+        dbResponses.push(newPayload);
+        localStorage.setItem('db_combos', JSON.stringify(dbResponses));
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-result').classList.add('active');
+        document.getElementById('progress-wrapper').style.display = 'none';
+    }
+
+    function verifyAdminPassword() {
+        let password = prompt("管理員安全驗證，請輸入密碼：");
+        if (password === "8888") {
+            document.getElementById('quiz-app').style.display = 'none';
+            document.getElementById('admin-app').style.display = 'block';
+            renderAdminTable();
+        } else if (password !== null) {
+            alert("密碼錯誤！");
+        }
+    }
+
+    function renderAdminTable() {
+        const tbody = document.getElementById('admin-table-body');
+        let sorted = [...dbResponses].sort((a,b) => new Date(b.time) - new Date(a.time));
+
+        tbody.innerHTML = sorted.map(r => `
+            <tr>
+                <td><strong>${r.time}</strong></td>
+                <td><span class="badge" style="background:#e2e8f0;">${r.q2}</span><br><small style="color:#718096">${photoMap['褲子_'+r.q2] || ''}</small></td>
+                <td><span class="badge" style="background:#edf2f7;">${r.q4}</span><br><small style="color:#718096">${photoMap['上衣_'+r.q4] || ''}</small></td>
+                <td style="color: #2b6cb0; font-weight:500;">${r.q5}</td>
+                <td style="color: #b7791f;">${r.q7}</td>
+                <td><mark style="background:#feebc8; padding:2px 6px; border-radius:4px;">${r.q8}</mark></td>
+            </tr>
+        `).join('');
+    }
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'true') { verifyAdminPassword(); }
+    }
+</script>
+</body>
+</html>
